@@ -13,12 +13,16 @@ using namespace std;
 void PbSerializer::Serialize(std::string *info, duckdb::PhysicalOperator* physical_operator, unordered_map<int, string>& tableid2name) {
 	substrait::Rel* relation_entry = physical_operator->ToSubstraitClass(tableid2name);
 	relation_entry->SerializeToString(info);
+
+	delete relation_entry;
 }
 
 void PbSerializer::SerializeToFile(string& file_name, PhysicalOperator* physical_operator, unordered_map<int, string>& tableid2name) {
 	substrait::Rel* relation_entry = physical_operator->ToSubstraitClass(tableid2name);
 	ofstream out_file(file_name, ios::out|ios::binary);
 	relation_entry->SerializePartialToOstream(&out_file);
+
+	delete relation_entry;
 }
 
 unique_ptr<duckdb::PhysicalOperator> PbSerializer::DeSerialize(ClientContext& context, std::string *info) {
@@ -28,7 +32,9 @@ unique_ptr<duckdb::PhysicalOperator> PbSerializer::DeSerialize(ClientContext& co
 	unordered_map<std::string, duckdb::TableCatalogEntry *> table_entry;
 	unordered_map<std::string, int> table_index;
 	int index = 1;
-	return DispatchTask(context, *relation_entry, table_entry, table_index, index);
+	unique_ptr<duckdb::PhysicalOperator> result = DispatchTask(context, *relation_entry, table_entry, table_index, index);
+	delete relation_entry;
+	return result;
 }
 
 unique_ptr<duckdb::PhysicalOperator> PbSerializer::DeSerializeFromFile(ClientContext& context, std::string& file_name) {
@@ -42,7 +48,9 @@ unique_ptr<duckdb::PhysicalOperator> PbSerializer::DeSerializeFromFile(ClientCon
 	unordered_map<std::string, duckdb::TableCatalogEntry *> table_entry;
 	unordered_map<std::string, int> table_index;
 	int index = 1;
-	return DispatchTask(context, *relation_entry, table_entry, table_index, index);
+	unique_ptr<duckdb::PhysicalOperator> result = DispatchTask(context, *relation_entry, table_entry, table_index, index);
+	delete relation_entry;
+	return result;
 }
 
 unique_ptr<PhysicalOperator> PbSerializer::DispatchTask(ClientContext& context, const substrait::Rel& cur, unordered_map<std::string, duckdb::TableCatalogEntry *> &table_entry,
