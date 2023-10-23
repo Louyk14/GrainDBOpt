@@ -14,6 +14,7 @@ void PbSerializer::Serialize(std::string *info, duckdb::PhysicalOperator* physic
 	substrait::Rel* relation_entry = physical_operator->ToSubstraitClass(tableid2name);
 	relation_entry->SerializeToString(info);
 
+	relation_entry->Clear();
 	delete relation_entry;
 }
 

@@ -115,3 +115,4 @@ substrait::Rel* PhysicalProjection::ToSubstraitClass(unordered_map<int, string>&
 
 	return project_rel;
 }
+

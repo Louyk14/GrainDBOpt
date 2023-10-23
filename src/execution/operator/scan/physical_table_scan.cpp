@@ -467,6 +467,9 @@ substrait::Rel* PhysicalTableScan::ToSubstraitClass(unordered_map<int, string>& 
 				*scalar_function->add_arguments() = *arg2;
 				filter->set_allocated_scalar_function(scalar_function);
 
+				delete arg1;
+				delete arg2;
+
 				break;
 			}
 		}
